@@ -1,2 +1,2 @@
 # Chatbot-Demo
-Demo fo my chatbot
+Chatbot demo, checking whether chatbot publicity is present.
