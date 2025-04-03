@@ -68,4 +68,4 @@ def ask():
 # Run Flask app on Render-assigned port
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Use Render's assigned port
-    app.run(host="0.0.0.0", port=port)  # Removed debug mode for production
+    app.run(host="0.0.0.0", port=port, debug=False)  # Set debug=False for production
