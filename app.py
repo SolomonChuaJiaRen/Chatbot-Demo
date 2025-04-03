@@ -8,6 +8,7 @@ app = Flask(__name__)
 # Load GPT-2 model and tokenizer
 model_name = "distilgpt2"
 print("Loading model...")
+
 try:
     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
     model = GPT2LMHeadModel.from_pretrained(model_name)
@@ -22,16 +23,26 @@ def chat_with_gpt2(user_input):
         return "Model is not loaded properly."
     
     try:
+        # Tokenize and encode the user input
         inputs = tokenizer.encode(user_input, return_tensors="pt", add_special_tokens=True)
+        
+        # Create an attention mask to avoid padding issues
+        attention_mask = torch.ones(inputs.shape, dtype=torch.long)  # All tokens are real, no padding
+        
+        # Generate output with sampling for randomness
         with torch.no_grad():
             outputs = model.generate(
                 inputs, 
-                max_length=50, 
+                attention_mask=attention_mask,
+                max_length=50,  # Control response length
                 num_return_sequences=1, 
                 do_sample=True,  # Enables randomness
-                top_k=50,  # Limits to top 50 words
-                top_p=0.95  # Nucleus sampling
+                top_k=50,  # Limits to top 50 words for sampling
+                top_p=0.95,  # Nucleus sampling
+                temperature=0.7  # Adjust temperature for more controlled responses
             )
+        
+        # Decode the response back to text
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         print("Generated Response:", response)  # Debug print
         return response
@@ -53,11 +64,11 @@ def ask():
     if not user_input:
         return jsonify({"response": "I didn't receive any input."})
     
-    if user_input.lower() == "exit":
+    if user_input.lower() == "exit":    
         return jsonify({"response": "Goodbye!"})
 
     response = chat_with_gpt2(user_input)
-    return jsonify({"response": response})
+    return jsonify({"response": response}) 
 
 # Run the Flask app
 if __name__ == "__main__":
